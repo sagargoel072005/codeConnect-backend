@@ -2,14 +2,20 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
+const { validateSignUpData } = require("./utils/validation")
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-    console.log(req.body);
-    const user = new User(req.body);
-    await user.save();
-    res.send("successfullly");
+    try {
+        validateSignUpData(req);//validation of data
+        const user = new User(req.body);
+        await user.save();
+        res.send(" user added successfullly");
+    } catch (err) {
+        res.status(400).send("error saving the user" + err.message);
+    }
+
 });
 
 app.get("/user", async (req, res) => {
@@ -34,7 +40,7 @@ app.patch("/user/:userId", async (req, res) => {
 
     try {
 
-        const ALLOWED_UPDATES = ["photoUrl", "emailId", "about", "gender", "age", "skills"];
+        const ALLOWED_UPDATES = ["photoUrl", "emailId", "password", "about", "gender", "age", "skills"];
         const IsUpdateAllowed = Object.keys(data).every((k) =>
             ALLOWED_UPDATES.includes(k)
         );
@@ -42,9 +48,9 @@ app.patch("/user/:userId", async (req, res) => {
         if (!IsUpdateAllowed) {
             res.status(400).send("update not allowed");
         }
-        await User.findByIdAndUpdate({ _id: userId }, data,{
-            returnDocument:"after",
-            runValidators:true,
+        await User.findByIdAndUpdate({ _id: userId }, data, {
+            returnDocument: "after",
+            runValidators: true,
         });
         res.send("User found");
     } catch (err) {

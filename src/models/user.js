@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs") //Password Hashing (If You're Storing Real Passwords) You should never store raw passwords
+const validator = require("validator");
 
 const userSchema = mongoose.Schema({
     firstName: {
@@ -17,16 +17,20 @@ const userSchema = mongoose.Schema({
         unique: true,
         lowercase: true,
         trim: true, // removes white spaces
-        validate: {
-            validator: function (v) {
-                return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v);
-            },
-            message: (props) => `${props.value} is not a valid email!`
+        validate(value) {
+            if (!validator.isEmail(value)) {
+                throw new Error("Invalid Email address" + value);
+            }
         }
     },
     password: {
         type: String,
         required: true,
+        validate(value) {
+            if (!validator.isStrongPassword(value)) {
+                throw new Error("enter a strong password" + value);
+            }
+        }
     },
     age: {
         type: Number,
@@ -43,6 +47,11 @@ const userSchema = mongoose.Schema({
     photoUrl: {
         type: String,
         default: "https://s3.amazonaws.com/37assets/svn/765-default-avatar.png",
+        validate(value) {
+            if (!validator.isURL(value)) {
+                throw new Error("Invalid photo URL" + value);
+            }
+        }
     },
     about: {
         type: String,
@@ -61,11 +70,5 @@ const userSchema = mongoose.Schema({
     timestamps: true,
 });
 
-userSchema.pre("save", async function (next) {
-    if (this.isModified("password")) {
-        this.password = await bcrypt.hash(this.password, 10);
-    }
-    next();
-});
 
 module.exports = mongoose.model("User", userSchema);
