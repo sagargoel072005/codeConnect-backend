@@ -2,64 +2,67 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
-const { validateSignUpData } = require("./utils/validation")
+const { validateSignUpData } = require("./utils/validation");
+const bcrypt = require("bcryptjs");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken"); // npm i jsonwebtoken
+const { userAuth } = require("./middlewares/auth");
 
 app.use(express.json());
+app.use(cookieParser()); // npm i cookie-parser 
 
 app.post("/signup", async (req, res) => {
     try {
-        validateSignUpData(req);//validation of data
-        const user = new User(req.body);
+        //validation of data
+        validateSignUpData(req);
+        const { firstName, lastName, emailId, password } = req.body;
+        //encryption of password
+        const passwordHash = await bcrypt.hash(password, 10);
+        //creating a new instance of user
+        const user = new User({
+            firstName, lastName, emailId, password: passwordHash,
+        });
         await user.save();
         res.send(" user added successfullly");
     } catch (err) {
-        res.status(400).send("error saving the user" + err.message);
+        res.status(400).send("error saving the user : " + err.message);
     }
 
 });
 
-app.get("/user", async (req, res) => {
-    const userEmail = req.body.emailId;
+app.post("/login", async (req, res) => {
     try {
-        const user = await User.find({ emailId: userEmail });
-        console.log("MongoDB result:", user);
-        if (user.length === 0) {
-            res.status(404).send("user not found");
+        const { emailId, password } = req.body;
+        const user = await User.findOne({ emailId: emailId });
+        if (!user) {
+            throw new Error("EmailId is not present in DB");
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (isPasswordValid) {
+
+            // create a JWT token
+            const token = await user.getJWT();  // offloads token logic to schema methods
+          
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + 8 * 3600000),
+            });
+            res.send("login successfull!!!!");
         } else {
-            res.send(user);
+            throw new Error("Password is not correct");
         }
     } catch (err) {
-        res.status(400).send("something went wrong");
+        res.status(400).send("error saving the user : " + err.message);
     }
 });
 
-app.patch("/user/:userId", async (req, res) => {
-    const userId = req.params?.userId;
-    const data = req.body;
-    console.log("Body:", data);
-
+app.get("/profile", userAuth, async (req, res) => {
     try {
-
-        const ALLOWED_UPDATES = ["photoUrl", "emailId", "password", "about", "gender", "age", "skills"];
-        const IsUpdateAllowed = Object.keys(data).every((k) =>
-            ALLOWED_UPDATES.includes(k)
-        );
-
-        if (!IsUpdateAllowed) {
-            res.status(400).send("update not allowed");
-        }
-        await User.findByIdAndUpdate({ _id: userId }, data, {
-            returnDocument: "after",
-            runValidators: true,
-        });
-        res.send("User found");
+        const user = req.user;
+        res.send(user);
     } catch (err) {
-        res.status(400).send("Something went wrong");
+        res.status(400).send("ERROR:" + err.message);
     }
 });
-
-
-
 
 connectDB()
     .then(() => {

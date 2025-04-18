@@ -11,4 +11,4 @@ const validateSignUpData = (req) => {
     }
 };
 
-module.export = { validateSignUpData, };
+module.exports = { validateSignUpData };
