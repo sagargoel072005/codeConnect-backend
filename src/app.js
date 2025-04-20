@@ -10,7 +10,7 @@ app.use(cookieParser()); // npm i cookie-parser
 
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
-const requestRouter = require("./routes/connectionRequest");
+const requestRouter = require("./routes/Request");
 
 app.use("/",authRouter);
 app.use("/",profileRouter);

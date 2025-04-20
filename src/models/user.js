@@ -6,12 +6,15 @@ const userSchema = mongoose.Schema({
     firstName: {
         type: String,
         required: true,
+        index:true,
         minLength: 4,
         maxLength: 50,
     },
+
     lastName: {
         type: String
     },
+
     emailId: {
         type: String,
         required: true,
@@ -24,6 +27,7 @@ const userSchema = mongoose.Schema({
             }
         }
     },
+
     password: {
         type: String,
         required: true,
@@ -33,18 +37,20 @@ const userSchema = mongoose.Schema({
             }
         }
     },
+
     age: {
         type: Number,
         min: 18,
     },
+
     gender: {
         type: String,
-        validate(value) {
-            if (!["male", "female", "others"].includes(value)) {
-                throw new Error("Gender data is not valid");
-            }
-        },
+        enum:{
+            values:["male", "female", "others"],
+            message:`{VALUE} is not a valid gender type`
+        }
     },
+
     photoUrl: {
         type: String,
         default: "https://s3.amazonaws.com/37assets/svn/765-default-avatar.png",
@@ -54,10 +60,12 @@ const userSchema = mongoose.Schema({
             }
         }
     },
+
     about: {
         type: String,
         default: "Hello,I am a developer ",
     },
+
     skills: {
         type: [String],
         validate: {
@@ -67,9 +75,14 @@ const userSchema = mongoose.Schema({
             message: "You can add a maximum of 10 skills.",
         }
     }
-}, {
+},
+
+ {
     timestamps: true,
 });
+
+//creating index  -  compound index
+userSchema.index({fromUserId:1,toUserId:1});
 
  // create a JWT token
 userSchema.methods.getJWT = async function () {
