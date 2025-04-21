@@ -11,10 +11,9 @@ patch/profile/edit
 patch/profile/edit/password
 
 # connectionRequestRouter
-post/request/send/interested/:userId
-post/request/send/ignored/:userId
-post/request/send/review/accepted/:requestId
-post/request/send/review/rejected/:requestId
+post/request/send/:status/:userId : interested / ignored
+
+post/request/send/review/:status/:requestId : accepted / rejected
 
 # userRouter
 get/user/connections
