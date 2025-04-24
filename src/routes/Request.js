@@ -51,17 +51,17 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
 requestRouter.post("/request/send/review/:status/:requestId", userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
-        const { status, request } = req.params;
-        const allowedStatus = ["ignored", "interested"];
+        const { status, requestId } = req.params;
+        const reviewedStatus = ["accepted", "rejected"];
 
         // status validation
-        if (!allowedStatus.includes(status)) {
+        if (!reviewedStatus.includes(status)) {
             return res.status(400).json({ message: "status type not allowed: " + status });
         }
         const connectionRequest = await ConnectionRequest.findOne({
             _id: requestId,
-            fromUserId: loggedInUser._id,
-            status: "interested,"
+            toUserId: loggedInUser._id,
+            status: "interested",
         });
 
         if (!connectionRequest) {
@@ -79,8 +79,6 @@ requestRouter.post("/request/send/review/:status/:requestId", userAuth, async (r
     } catch (err) {
         res.status(400).send("ERROR:" + err.message);
     }
-
 });
-
 
 module.exports = requestRouter;
