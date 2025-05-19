@@ -8,21 +8,22 @@ const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills"
 
 // get all the pending connection request for the loggedIn user
 userRouter.get("/user/requests/received", userAuth, async (req, res) => {
-    try {
-        const loggedInUser = req.user;
-        const connectionRequest = await ConnectionRequest.find({
-            toUserId: loggedInUser._id,
-            status: "interested",
-        }).populate("fromUserId", USER_SAFE_DATA);
+  try {
+      const loggedInUser = req.user;
 
-        res.json({
-            message: "connection request are :",
-            data: connectionRequest,
-        })
+      const connectionRequest = await ConnectionRequest.find({
+          toUserId: loggedInUser._id,
+          status: "interested",
+      }).populate("fromUserId", USER_SAFE_DATA);
 
-    } catch (err) {
-        req.statusCode(400).send("ERROR: " + err.message);
-    }
+      res.json({
+          message: "Connection requests are:",
+          data: connectionRequest,
+      });
+//.map((req) => req.fromUserId),
+  } catch (err) {
+      res.status(400).send("ERROR: " + err.message);
+  }
 });
 
 
@@ -58,8 +59,8 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       const loggedInUser = req.user;
   
       const page = parseInt(req.query.page) || 1;
-      let limit = parseInt(req.query.limit) || 10;
-      limit = limit > 50 ? 50 : limit;
+      let limit = parseInt(req.query.limit) || 12;
+      limit = limit > 70 ? 70 : limit;
       const skip = (page - 1) * limit;
   
       const connectionRequest = await ConnectionRequest.find({

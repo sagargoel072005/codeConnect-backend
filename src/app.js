@@ -15,7 +15,7 @@ app.use(cookieParser()); // npm i cookie-parser
 
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
-const requestRouter = require("./routes/Request");
+const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
 
 app.use("/", authRouter);
