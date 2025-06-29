@@ -4,6 +4,8 @@ const app = express();
 const { userAuth } = require("./middlewares/auth");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+require("dotenv").config();
+
 const jwt = require("jsonwebtoken"); // npm i jsonwebtoken
 
 app.use(cors({
@@ -26,7 +28,7 @@ app.use("/", userRouter);
 connectDB()
     .then(() => {
         console.log("database established");
-        app.listen(7777, () => {
+        app.listen(process.env.PORT, () => {
             console.log("server is successfuly listening on port 7777....");
         });
     })

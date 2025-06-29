@@ -4,6 +4,10 @@ const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest")
 const User = require("../models/user");
 
+
+const sendEmail = require("../utils/sendEmail");
+
+
 requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res) => {
     try {
         const fromUserId = req.user._id;
@@ -39,6 +43,9 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
         });
 
         const data = await connectionRequest.save(); //saves in databse
+const emailRes = await sendEmail.run();
+console.log(emailRes);
+
         res.json({
             message: "Connection Request Sent Successfully",
             data,
@@ -47,9 +54,6 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
         res.status(400).send("ERROR:" + err.message);
     }
 });
-
-
-
 
 requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, res) => {
     try {
