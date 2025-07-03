@@ -34,7 +34,7 @@ connectDB()
         });
     })
     .catch(() => {
-        console.log("database not established");
+        console.log("database not established", err);
     });
 
 
