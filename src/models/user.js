@@ -6,7 +6,7 @@ const userSchema = mongoose.Schema({
     firstName: {
         type: String,
         required: true,
-        index:true,
+        index: true,
         minLength: 4,
         maxLength: 50,
     },
@@ -45,10 +45,17 @@ const userSchema = mongoose.Schema({
 
     gender: {
         type: String,
-        enum:{
-            values:["male", "female", "others"],
-            message:`{VALUE} is not a valid gender type`
+        enum: {
+            values: ["male", "female", "others"],
+            message: `{VALUE} is not a valid gender type`
         }
+    },
+    isPremium: {
+        type: Boolean,
+        default: false,
+    },
+    membershipType: {
+        type: String,
     },
 
     photoUrl: {
@@ -77,14 +84,14 @@ const userSchema = mongoose.Schema({
     }
 },
 
- {
-    timestamps: true,
-});
+    {
+        timestamps: true,
+    });
 
 //creating index  -  compound index
-userSchema.index({fromUserId:1,toUserId:1});
+userSchema.index({ fromUserId: 1, toUserId: 1 });
 
- // create a JWT token
+// create a JWT token
 userSchema.methods.getJWT = async function () {
     // arrow function will not work here
     const user = this; //this function is compatible with older functions
