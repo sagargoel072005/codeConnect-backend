@@ -1,13 +1,14 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
-const { userAuth } = require("./middlewares/auth");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-require("dotenv").config();
-require("./utils/cronjob");
-
+const http = require("http");
 const jwt = require("jsonwebtoken"); // npm i jsonwebtoken
+const initializeSocket = require("./utils/socket");
+require("dotenv").config();
+require("./utils/cronjob"); 
+
 
 app.use(cors({
   origin: [
@@ -27,17 +28,25 @@ const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
 const paymentRouter = require("./routes/payment");
+const chatRouter = require("./routes/chat");
+
+
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use("/", paymentRouter);
+app.use("/", chatRouter);
+
+const server = http.createServer(app);
+initializeSocket(server);
+
 
 connectDB()
     .then(() => {
         console.log("database established");
-        app.listen(process.env.PORT, "0.0.0.0",() => {
+        server.listen(process.env.PORT, "0.0.0.0",() => {
             console.log("server is successfuly listening on port 7777....");
         });
     })

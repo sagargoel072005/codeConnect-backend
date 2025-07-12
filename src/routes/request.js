@@ -11,6 +11,7 @@ const sendEmail = require("../utils/sendEmail");
 requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res) => {
     try {
         const fromUserId = req.user._id;
+        const firstName = req.user.firstName;
         const toUserId = req.params.toUserId;
         const status = req.params.status;
         const allowedStatus = ["ignored", "interested"];
@@ -43,13 +44,18 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
         });
 
         const data = await connectionRequest.save(); //saves in databse
-const emailRes = await sendEmail.run();
-console.log(emailRes);
+        const emailRes = await sendEmail.run(
+          "New Connection Request",
+  `${ firstName} sent you a request!`,
+  toUser.email 
+        );
+        console.log(emailRes);
 
         res.json({
             message: "Connection Request Sent Successfully",
             data,
         });
+        
     } catch (err) {
         res.status(400).send("ERROR:" + err.message);
     }
@@ -91,3 +97,20 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, r
 
 
 module.exports = requestRouter;
+
+/**
+ *           "New Connection Request",
+  `${fromUserId} sent you a request!`,
+  toUser.email );
+ */
+
+  /**
+   *    {
+      message: {
+        subject: { data: "New Connection Request" },
+        body: { data: `User ${req.user.firstName} wants to connect with you.` }
+      }
+    }
+     
+   * 
+   */
