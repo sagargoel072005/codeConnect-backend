@@ -95,7 +95,7 @@ userSchema.index({ fromUserId: 1, toUserId: 1 });
 userSchema.methods.getJWT = async function () {
     // arrow function will not work here
     const user = this; //this function is compatible with older functions
-    const token = await jwt.sign({ _id: user._id }, "SAGAR@!@#", {
+    const token = await jwt.sign({ _id: user._id }, process.env.JWT_TOKEN , {
         expiresIn: "1d",
     });
     return token; //hidden data + secret key
