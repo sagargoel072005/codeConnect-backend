@@ -71,39 +71,4 @@ authRouter.post("/logout", async (req, res) => {
     res.send("logout successfull!!!!");
 });
 
-const frontendURL =
-  process.env.NODE_ENV === "production"
-    ? "https://codeconnect.shop"
-    : "http://localhost:5173";
-
-
-
-authRouter.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-
-authRouter.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/login",
-   
-    session: false,
-  }),
-  async (req, res) => {
-    const token = req.user.getJWT();
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false, // true if you're using HTTPS only
-      sameSite: "lax",
-      expires: new Date(Date.now() + 8 * 3600000),
-    });
-
-    const frontendURL =
-      process.env.NODE_ENV === "production"
-        ? "https://codeconnect.shop"
-        : "http://localhost:5173";
-
-    res.redirect(`${frontendURL}/profile`);
-  }
-);
-
 module.exports = authRouter;
