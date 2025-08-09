@@ -2,6 +2,7 @@ const express = require("express");
 const { userAuth } = require("../middlewares/auth");
 const userRouter = express.Router();
 const User = require("../models/user")
+const Post = require("../models/post")
 const ConnectionRequest = require("../models/connectionRequest");
 
 const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills"
@@ -27,7 +28,6 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
 });
 
 
-// finding the number of user collection of status accepted
 userRouter.get("/user/connections", userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
@@ -48,7 +48,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 
         res.json({ data });
     } catch (err) {
-        res.statusCode(400).send("ERROR: " + err.message);
+        res.status(400).send("ERROR: " + err.message);
     }
 });
 
@@ -86,5 +86,28 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     }
   });
   
+userRouter.get("/user/:id", userAuth, async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Fetch user profile data excluding sensitive info
+    const user = await User.findById(userId).select(USER_SAFE_DATA);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Fetch posts by this user, populate commenter and post user details
+    const posts = await Post.find({ user: userId })
+      .populate("user", "firstName lastName profilePicture")
+      .populate("comments.user", "firstName lastName profilePicture")
+      .sort({ createdAt: -1 });
+
+    res.json({ user, posts });
+  } catch (err) {
+    console.error("Error in /user/:id:", err);
+    res.status(500).json({ error: err.message || "Server error" });
+  }
+});
+
 
 module.exports = userRouter;
