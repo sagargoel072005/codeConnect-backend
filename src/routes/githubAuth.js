@@ -13,7 +13,7 @@ const BACKEND_URL = process.env.BACKEND_URL || "https://www.codeconnect.shop";
 
 // Step 1: Redirect logged-in user to GitHub OAuth login page
 router.get("/auth/github/login", userAuth, (req, res) => {
-  const redirectUri = `${BACKEND_URL}/auth/github/callback`;
+  const redirectUri = `${BACKEND_URL.replace(/\/$/, "")}/auth/github/callback`;
   const githubUrl = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=read:user repo&redirect_uri=${redirectUri}`;
   res.redirect(githubUrl);
 });
